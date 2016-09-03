@@ -1,0 +1,13 @@
+{
+  "name": "ac-angular-utils",
+  "homepage": "https://github.com/arielcessario/ac-angular-utils",
+  "_release": "587a2c0842",
+  "_resolution": {
+    "type": "branch",
+    "branch": "master",
+    "commit": "587a2c08426c235df179864e2f92806ebe8e22c4"
+  },
+  "_source": "https://github.com/arielcessario/ac-angular-utils.git",
+  "_target": "*",
+  "_originalSource": "ac-angular-utils"
+}
