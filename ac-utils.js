@@ -1,5 +1,4 @@
 /*TODO: No funciona para carritos*/
-
 (function () {
     'use strict';
     var scripts = document.getElementsByTagName("script");
@@ -132,7 +131,6 @@
                     var control = angular.element(document.querySelectorAll('.error-input'));
                     var error = angular.element(document.querySelectorAll('.error-message'));
 
-
                     for (var i = 0; i < control.length; i++) {
 
                         control[i].classList.remove('error-input');
@@ -202,7 +200,7 @@
                     }
 
                     // Verifico si el CUIT/CUIL es correcto
-                    if ($scope.isCuit != undefined && $element.val().length != 8 && !validaCuit($element.val())) {
+                    if ($scope.isCuit != undefined && $element.val().length != 8 && !AcUtils.validaCuit($element.val())) {
                         texto = texto + $scope.isCuit + '</br>';
                     }
 
@@ -307,16 +305,19 @@
 
                         var lstErrores = Object.getOwnPropertyNames(AcUtilsGlobals.errores[parent]);
 
-
                         lstErrores.forEach(function (e, index, array) {
                             (function () {
                                 var elem = angular.element(document.querySelector('#' + e));
+                                console.log(elem);
+                                console.log(elem[0]);
                                 elem.addClass('error-input');
-                                elem[0].addEventListener('focus', function () {
-                                    elem.removeClass('error-input');
-                                    elem[0].removeEventListener('focus', removeFocus);
-                                    removeError(getMainContainer(elem));
-                                });
+                                if(elem[0] != undefined) {
+                                    elem[0].addEventListener('focus', function () {
+                                        elem.removeClass('error-input');
+                                        elem[0].removeEventListener('focus', removeFocus);
+                                        removeError(getMainContainer(elem));
+                                    });
+                                }
                             })();
                             addMessages(angular.element(document.querySelector('#' + e)));
 
@@ -423,6 +424,7 @@
                  * @param sCUIT
                  * @returns {boolean}
                  */
+                /*
                 function validaCuit(sCUIT) {
                     var aMult = '6789456789';
                     var aMult = aMult.split('');
@@ -443,6 +445,7 @@
                     }
                     return false;
                 }
+                */
 
             },
             link: function (scope, element, attrs, ctrl) {
@@ -682,10 +685,16 @@
         var service = {};
 
         service.validateEmail = validateEmail;
+        service.validaCuit = validaCuit;
+        service.validaTelefono = validaTelefono;
+        service.validaNumero = validaNumero;
+        service.validaFecha = validaFecha;
+        service.validaHora = validaHora;
         service.validations = validations;
         service.verifyBrowser = verifyBrowser;
         service.getByParams = getByParams;
         service.showMessage = showMessage;
+        service.omitirAcentos = omitirAcentos;
         // Servicios de paginación
         service.goToPagina = goToPagina;
         service.first = first;
@@ -695,6 +704,23 @@
 
         return service;
 
+        /**
+         *
+         * @param texto
+         * @returns {*}
+         */
+        function omitirAcentos(texto){
+            var acentos = "ÃÀÁÄÂÈÉËÊÌÍÏÎÒÓÖÔÙÚÜÛãàáäâèéëêìíïîòóöôùúüûÑñÇç";
+            var original = "AAAAAEEEEIIIIOOOOUUUUaaaaaeeeeiiiioooouuuunncc";
+
+            if(texto !== undefined) {
+                for(var i=0; i < acentos.length; i++){
+                    texto = texto.replace(acentos.charAt(i), original.charAt(i));
+                }
+            }
+            console.log(texto);
+            return texto;
+        }
 
         /**
          * @description Retorna la lista filtrada de Carritos
@@ -783,11 +809,91 @@
             return obj;
         }
 
+        /**
+         *
+         * @param email
+         * @returns {boolean}
+         */
         function validateEmail(email) {
             var re = /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/i;
             return re.test(email);
         }
 
+        /**
+         * http://stackoverflow.com/questions/15491894/regex-to-validate-date-format-dd-mm-yyyy
+         * @param fecha
+         */
+        function validaFecha(fecha) {
+            //var reg = /^([0-9]{2})\/([0-9]{2})\/([0-9]{4})$/;
+            var reg = /^(?:(?:31(\/|-|\.)(?:0?[13578]|1[02]))\1|(?:(?:29|30)(\/|-|\.)(?:0?[1,3-9]|1[0-2])\2))(?:(?:1[6-9]|[2-9]\d)?\d{2})$|^(?:29(\/|-|\.)0?2\3(?:(?:(?:1[6-9]|[2-9]\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\d|2[0-8])(\/|-|\.)(?:(?:0?[1-9])|(?:1[0-2]))\4(?:(?:1[6-9]|[2-9]\d)?\d{2})$/;
+            return reg.test(fecha);
+        }
+
+
+        function validaNumero(numero) {
+            var reg = /^[0-9]+$/;
+            return reg.test(numero);
+        }
+
+
+        /**
+         *
+         * @param hora
+         * @returns {boolean}
+         */
+        function validaHora(hora) {
+            var reg = /^(?:2[0-3]|[01]?[0-9]):[0-5][0-9]:[0-5][0-9]$/;
+            return reg.test(hora);
+
+            //var reg = /^([0-1]?[0-9]|2[0-4]):([0-5][0-9])(:[0-5][0-9])?$/;
+            //return reg.test(hora);
+        }
+
+        /**
+         *
+         * @param telefono
+         * @returns {boolean}
+         */
+        function validaTelefono(telefono) {
+            var reg = /^[(]{0,1}[0-9]{3}[)]{0,1}[-\s\.]{0,1}[0-9]{3}[-\s\.]{0,1}[0-9]{4}$/;
+            return reg.test(telefono);
+
+            /*
+            var reg = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
+            if(telefono.value.match(reg)) {
+                return true;
+            } else {
+                return false;
+            }
+            */
+        }
+
+        /**
+         * Validación de CUIT/CUIL
+         * @param sCUIT
+         * @returns {boolean}
+         */
+        function validaCuit(sCUIT) {
+            console.log(sCUIT);
+            var aMult = '6789456789';
+            var aMult = aMult.split('');
+            var sCUIT = String(sCUIT);
+            var iResult = 0;
+            var aCUIT = sCUIT.split('');
+
+            if (aCUIT.length == 11) {
+                // La suma de los productos
+                for (var i = 0; i <= 9; i++) {
+                    iResult += aCUIT[i] * aMult[i];
+                }
+                // El módulo de 11
+                iResult = (iResult % 11);
+
+                // Se compara el resultado con el dígito verificador
+                return (iResult == aCUIT[10]);
+            }
+            return false;
+        }
 
         function validations(control, texto) {
             var id = Math.floor((Math.random() * 1000) + 1);
@@ -831,18 +937,40 @@
         function showMessage(tipo, texto, timeout) {
             var body = $document.find('body').eq(0);
 
-            var class_type = (tipo == 'error') ? 'ac-error-message' : 'ac-success-message';
-            body.append('<div ' +
-                'style="position: fixed; height: 100px; width: 250px; top:50%; left: calc(50% - 125px);" ' +
-                'class="ac-mensaje-custom-show ' + class_type + '" ' +
-                'id="ac-mensaje-custom" onclick="this.remove();">' + texto + '</div>');
+            //var class_type = (tipo == 'error') ? 'ac-error-message' : 'ac-success-message';
+            var class_type = '';
+            var class_fa_type = '';
+            var class_ico = '';
+            if(tipo == 'success') {
+                class_type = 'ac-success-message';
+                class_fa_type = 'fa-check';
+                class_ico = 'ico-success';
+            } else if(tipo == 'error') {
+                class_type = 'ac-error-message';
+                class_fa_type = 'fa-ban';
+                class_ico = 'ico-error';
+            } else if(tipo == 'info') {
+                class_type = 'ac-info-message';
+                class_fa_type = 'fa-info-circle';
+                class_ico = 'ico-info';
+            } else if(tipo == 'warning') {
+                class_type = 'ac-warning-message';
+                class_fa_type = 'fa-warning';
+                class_ico = 'ico-warn';
+            }
 
+            body.append('<div ' +
+                'style="" ' +
+                'class="ac-mensaje-custom-show ' + class_type + '" ' +
+                'id="ac-mensaje-custom" onclick="this.remove();"><i class="fa ' + class_fa_type + ' ' + class_ico + ' fa-2x"></i>' + texto +
+                '<i class="fa fa-times fa-2x exit-button ' + class_ico + '"' + ' onclick="this.remove();"></i></div>');
 
             timeout = (timeout == undefined) ? 3000 : timeout;
             $timeout(function () {
                 var el = angular.element(document.querySelector('#ac-mensaje-custom'));
                 el.remove();
             }, timeout);
+
         }
 
 
