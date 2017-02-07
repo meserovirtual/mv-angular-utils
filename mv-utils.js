@@ -3,26 +3,26 @@
     'use strict';
     var scripts = document.getElementsByTagName("script");
     var currentScriptPath = scripts[scripts.length - 1].src;
-    angular.module('acUtils', ['ngRoute'])
+    angular.module('mvUtils', ['ngRoute'])
         .config(['$routeProvider', function ($routeProvider) {
             $routeProvider.when('/module', {
                 templateUrl: currentScriptPath.replace('.js', '.html'),
-                controller: 'AcUtils'
+                controller: 'MvUtils'
             });
         }])
-        .controller('AcUtilsController', AcUtilsController)
-        .factory('AcUtils', AcUtils)
-        .service('AcUtilsGlobals', AcUtilsGlobals)
-        .directive('acSearchPanel', AcSearchPanel)
-        .directive('acValidator', AcValidator)
+        .controller('MvUtilsController', MvUtilsController)
+        .factory('MvUtils', MvUtils)
+        .service('MvUtilsGlobals', MvUtilsGlobals)
+        .directive('mvSearchPanel', MvSearchPanel)
+        .directive('mvValidator', MvValidator)
         .factory('ErrorHandler', ErrorHandler)
         .factory('xlatService', xlatService)
         .filter('xlat', xlat)
-        .component('acWaiting', AcWaiting())
-        .component('acBlocker', AcBlocker());
+        .component('mvWaiting', MvWaiting())
+        .component('mvBlocker', MvBlocker());
 
 
-    function AcBlocker(){
+    function MvBlocker(){
         return {
             bindings: {
                 blockerClick: '&',
@@ -39,7 +39,7 @@
     }
 
 
-    function AcWaiting() {
+    function MvWaiting() {
         return {
             bindings: {
                 texto: '=',
@@ -47,17 +47,17 @@
             },
             template: '' +
             '<div ' +
-            'id="ac-waiting" ' +
+            'id="mv-waiting" ' +
             'ng-if="$ctrl.isWaiting">' +
             '<span>{{$ctrl.texto}}</span>' +
             '<div ng-class="$ctrl.imagen"></div>' +
             '</div>',
-            controller: AcWaitingController
+            controller: MvWaitingController
         }
     }
 
-    AcWaitingController.$inject = ['$rootScope'];
-    function AcWaitingController($rootScope) {
+    MvWaitingController.$inject = ['$rootScope'];
+    function MvWaitingController($rootScope) {
         var vm = this;
         vm.isWaiting = false;
 
@@ -100,8 +100,8 @@
         };
     }
 
-    AcValidator.$inject = ["AcUtils", 'AcUtilsGlobals', '$timeout'];
-    function AcValidator(AcUtils, AcUtilsGlobals, $timeout) {
+    MvValidator.$inject = ["MvUtils", 'MvUtilsGlobals', '$timeout'];
+    function MvValidator(MvUtils, MvUtilsGlobals, $timeout) {
         return {
             restrict: 'A',
             scope: {
@@ -119,20 +119,17 @@
             controller: function ($scope, $element, $attrs) {
                 var vm = this;
 
-
                 // Agrego siempre el error, luego se va cuando completo bien los datos requeridos
                 addError(getMainContainer($element));
-
 
                 /**
                  * En el caso que se necesite, borra todas las instancias de los mensajes de error. No usar en la mayoría de los casos.
                  */
-                AcUtilsGlobals.listen(function () {
+                MvUtilsGlobals.listen(function () {
                     var control = angular.element(document.querySelectorAll('.error-input'));
                     var error = angular.element(document.querySelectorAll('.error-message'));
 
                     for (var i = 0; i < control.length; i++) {
-
                         control[i].classList.remove('error-input');
                         control[i].removeEventListener('focus');
                         //mensaje.remove();
@@ -174,10 +171,8 @@
                     // Randomizo un id para el div que voy a crear con la descripción del error
                     var id = Math.floor((Math.random() * 1000) + 1);
 
-
                     // Texto en donde mostrar el error, separo cada texto con </br>
                     var texto = '';
-
 
                     // Verifico requerido
                     if ($scope.isRequired != undefined && $element.val().trim().length == 0) {
@@ -195,12 +190,12 @@
                     }
 
                     // Verifico si el mail es correcto
-                    if ($scope.isMail != undefined && !AcUtils.validateEmail($element.val())) {
+                    if ($scope.isMail != undefined && !MvUtils.validateEmail($element.val())) {
                         texto = texto + $scope.isMail + '</br>';
                     }
 
                     // Verifico si el CUIT/CUIL es correcto
-                    if ($scope.isCuit != undefined && $element.val().length != 8 && !AcUtils.validaCuit($element.val())) {
+                    if ($scope.isCuit != undefined && $element.val().length != 8 && !MvUtils.validaCuit($element.val())) {
                         texto = texto + $scope.isCuit + '</br>';
                     }
 
@@ -251,17 +246,17 @@
 
 
                     // Obtengo el nodo con propiedad que se llame como el padre
-                    if (!AcUtilsGlobals.errores.hasOwnProperty(parent)) {
-                        AcUtilsGlobals.errores[parent] = {};
+                    if (!MvUtilsGlobals.errores.hasOwnProperty(parent)) {
+                        MvUtilsGlobals.errores[parent] = {};
                     }
 
                     // Obtengo el nodo relacionado al control que estoy mirando, si no existe, lo creo
-                    if (!AcUtilsGlobals.errores[parent].hasOwnProperty($element[0].id)) {
-                        AcUtilsGlobals.errores[parent][$element[0].id] = {};
+                    if (!MvUtilsGlobals.errores[parent].hasOwnProperty($element[0].id)) {
+                        MvUtilsGlobals.errores[parent][$element[0].id] = {};
                     }
 
                     // Sobreescribo el valor del texto que contiene la descr del error
-                    AcUtilsGlobals.errores[parent][$element[0].id]['texto'] = texto;
+                    MvUtilsGlobals.errores[parent][$element[0].id]['texto'] = texto;
 
                 }
 
@@ -272,16 +267,16 @@
                 function removeError(parent) {
 
                     // Si no existe el padre, salgo ya que no tiene errores
-                    if (!AcUtilsGlobals.errores.hasOwnProperty(parent)) {
+                    if (!MvUtilsGlobals.errores.hasOwnProperty(parent)) {
                         return;
                     }
 
                     // verifico si algún hijo tiene errores
-                    if (AcUtilsGlobals.errores[parent].hasOwnProperty($element[0].id)) {
-                        delete AcUtilsGlobals.errores[parent][$element[0].id];
+                    if (MvUtilsGlobals.errores[parent].hasOwnProperty($element[0].id)) {
+                        delete MvUtilsGlobals.errores[parent][$element[0].id];
 
-                        if (Object.keys(AcUtilsGlobals.errores[parent]).length === 0) {
-                            delete AcUtilsGlobals.errores[parent];
+                        if (Object.keys(MvUtilsGlobals.errores[parent]).length === 0) {
+                            delete MvUtilsGlobals.errores[parent];
                         }
 
 
@@ -299,17 +294,15 @@
                     $element.bind('click', function (e) {
                         var parent = getMainContainer($element);
                         // Si no existe el padre, salgo ya que no tiene errores
-                        if (!AcUtilsGlobals.errores.hasOwnProperty(parent)) {
+                        if (!MvUtilsGlobals.errores.hasOwnProperty(parent)) {
                             return;
                         }
 
-                        var lstErrores = Object.getOwnPropertyNames(AcUtilsGlobals.errores[parent]);
+                        var lstErrores = Object.getOwnPropertyNames(MvUtilsGlobals.errores[parent]);
 
                         lstErrores.forEach(function (e, index, array) {
                             (function () {
                                 var elem = angular.element(document.querySelector('#' + e));
-                                console.log(elem);
-                                console.log(elem[0]);
                                 elem.addClass('error-input');
                                 if(elem[0] != undefined) {
                                     elem[0].addEventListener('focus', function () {
@@ -320,13 +313,11 @@
                                 }
                             })();
                             addMessages(angular.element(document.querySelector('#' + e)));
-
                         });
 
                         e.stopImmediatePropagation();
                         e.preventDefault();
                         e.stopPropagation();
-
                     });
 
                 }
@@ -337,7 +328,6 @@
                 $element.bind('blur', onChange);
                 $element.bind('keyup', onChange);
                 $scope.$watch('ngModel', function (newVal, oldVal) {
-
                     onChange(newVal, oldVal, 'ngModel');
                 });
 
@@ -366,11 +356,9 @@
                         return;
                     }
 
-
                     var elem = $element;
                     addError(getMainContainer(elem));
                     addMessages(elem);
-
                 }
 
 
@@ -380,7 +368,6 @@
                  * @param texto
                  */
                 function addMessages(elem) {
-
                     var parent = getMainContainer(elem);
 
                     //Agrego la visualización del error
@@ -388,12 +375,11 @@
 
 
                     if (angular.element(document.querySelector('#error-' + elem[0].id)).length == 0 &&
-                        AcUtilsGlobals.errores.hasOwnProperty(parent) &&
-                        AcUtilsGlobals.errores[parent].hasOwnProperty(elem[0].id)) {
-                        elem.after('<div class="error-message" id="error-' + elem[0].id + '">' + AcUtilsGlobals.errores[parent][elem[0].id]["texto"] + '</div>');
+                        MvUtilsGlobals.errores.hasOwnProperty(parent) &&
+                        MvUtilsGlobals.errores[parent].hasOwnProperty(elem[0].id)) {
+                        elem.after('<div class="error-message" id="error-' + elem[0].id + '">' + MvUtilsGlobals.errores[parent][elem[0].id]["texto"] + '</div>');
                     }
                     var mensaje = angular.element(document.querySelector('#error-' + elem[0].id));
-
 
                     mensaje.css('top', (elem[0].offsetTop + elem[0].offsetHeight) + 'px');
                     mensaje.css('left', elem[0].offsetLeft + 'px');
@@ -451,16 +437,16 @@
             link: function (scope, element, attrs, ctrl) {
 
             },
-            controllerAs: 'acSearchCtrl'
+            controllerAs: 'mvSearchCtrl'
         };
     }
 
     /**
-     * Directiva que muestra un panel de resultados de las b?squedas. Para darle aspecto, utilizar .ac-result-panel
+     * Directiva que muestra un panel de resultados de las b?squedas. Para darle aspecto, utilizar .mv-result-panel
      * @type {string[]}
      */
-    AcSearchPanel.$inject = ['$injector', 'AcUtilsGlobals', '$timeout', '$compile'];
-    function AcSearchPanel($injector, AcUtilsGlobals, $timeout, $compile) {
+    MvSearchPanel.$inject = ['$injector', 'MvUtilsGlobals', '$timeout', '$compile'];
+    function MvSearchPanel($injector, MvUtilsGlobals, $timeout, $compile) {
         return {
             restrict: 'AE',
             scope: {
@@ -477,7 +463,7 @@
                 var vm = this;
 
                 vm.resultados = [];
-                vm.acItemListPanelSelected = 0;
+                vm.mvItemListPanelSelected = 0;
                 var timeout = {};
                 vm.minInput = ($scope.minInput) ? $scope.minInput : 2;
 
@@ -486,7 +472,7 @@
                 // Cuando saco el mouse de la ventana, se tiene que ocultar la ventana
                 $element.bind('mouseleave', function () {
                     vm.over = false;
-                    timeout = $timeout(AcUtilsGlobals.broadcastPanel, 1000);
+                    timeout = $timeout(MvUtilsGlobals.broadcastPanel, 1000);
                 });
 
                 // El mouse arriba tiene que evitar que oculte la ventana
@@ -499,9 +485,8 @@
                 vm.selectItem = function (i) {
                     $scope.objeto = angular.copy(vm.resultados[i]);
                     vm.over = false;
-                    AcUtilsGlobals.broadcastPanel();
+                    MvUtilsGlobals.broadcastPanel();
                 };
-
 
                 // Mï¿½todo principal cuando tiene el foco o cuando presiona la tecla
                 $element.bind('keyup focus', function (event) {
@@ -511,7 +496,7 @@
 
                         // Avisa a todos los paneles para que se oculten
                         vm.over = false;
-                        AcUtilsGlobals.broadcastPanel();
+                        MvUtilsGlobals.broadcastPanel();
 
                         // Consigo el servicio a partir del par?metro pasado en la directiva
                         var myService = $injector.get($attrs.service);
@@ -519,7 +504,6 @@
                         if ($scope.func != undefined) {
                             $injector.get($attrs.service)[$scope.func]($scope.params, $element.val(), function (data) {
                                 if (data.length > 0) {
-
                                     procesarRespuesta(data);
                                 }
                             });
@@ -536,7 +520,7 @@
 
                     } else {
                         vm.over = false;
-                        AcUtilsGlobals.broadcastPanel();
+                        MvUtilsGlobals.broadcastPanel();
                     }
                 });
 
@@ -547,7 +531,7 @@
                     var id = Math.floor((Math.random() * 100000) + 1);
 
                     // Creo el contenedor de los items que devuelvo de la b?squeda.
-                    $element.after('<div class="ac-result-panel" id="panel-' + id + '"></div>');
+                    $element.after('<div class="mv-result-panel" id="panel-' + id + '"></div>');
 
                     // Obtengo a la lista y la guardo en una variable
                     var lista = angular.element(document.querySelector('#panel-' + id));
@@ -556,7 +540,7 @@
                     // Agrego un evento que cuando me voy de la lista espero un segundo y la remuevo
                     lista.bind('mouseleave', function () {
                         vm.over = false;
-                        timeout = $timeout(AcUtilsGlobals.broadcastPanel, 1000);
+                        timeout = $timeout(MvUtilsGlobals.broadcastPanel, 1000);
                     });
 
                     // Agrego un evento que cuando estoy sobre la lista, no se oculte
@@ -581,24 +565,24 @@
                                 }
                             }
                         }
-                        lista.append($compile('<div class="ac-item-list" ng-click="acSearchCtrl.selectItem(' + i + ')" ng-class="{\'ac-item-selected-list\': acSearchCtrl.acItemListPanelSelected == ' + i + '}">' + a_mostrar_text + '</div>')($scope));
+                        lista.append($compile('<div class="mv-item-list" ng-click="mvSearchCtrl.selectItem(' + i + ')" ng-class="{\'mv-item-selected-list\': mvSearchCtrl.mvItemListPanelSelected == ' + i + '}">' + a_mostrar_text + '</div>')($scope));
                     }
 
 
                     // Selecciono Item de la lista
                     // Me muevo para abajo en la lista
                     if (event.keyCode == 40) {
-                        vm.acItemListPanelSelected = (vm.acItemListPanelSelected + 1 > data.length - 1) ? vm.acItemListPanelSelected : vm.acItemListPanelSelected + 1;
+                        vm.mvItemListPanelSelected = (vm.mvItemListPanelSelected + 1 > data.length - 1) ? vm.mvItemListPanelSelected : vm.mvItemListPanelSelected + 1;
                     }
 
                     // Me muevo para arriba en la lista
                     if (event.keyCode == 38) {
-                        vm.acItemListPanelSelected = (vm.acItemListPanelSelected - 1 < 0) ? vm.acItemListPanelSelected : vm.acItemListPanelSelected - 1;
+                        vm.mvItemListPanelSelected = (vm.mvItemListPanelSelected - 1 < 0) ? vm.mvItemListPanelSelected : vm.mvItemListPanelSelected - 1;
                     }
 
                     // selecciono
                     if (event.keyCode == 13) {
-                        vm.selectItem(vm.acItemListPanelSelected);
+                        vm.selectItem(vm.mvItemListPanelSelected);
                     }
 
                     // Agrego formatos bï¿½sicos para la lista
@@ -614,11 +598,11 @@
                 }
 
                 // Oculto la lista si no est? el mouse arriba y no tiene foco
-                AcUtilsGlobals.listenPanel(function () {
+                MvUtilsGlobals.listenPanel(function () {
                     if (vm.over) {
                         return;
                     }
-                    var control = angular.element(document.querySelectorAll('.ac-result-panel'));
+                    var control = angular.element(document.querySelectorAll('.mv-result-panel'));
                     for (var i = 0; i < control.length; i++) {
                         control[i].remove();
                     }
@@ -629,20 +613,20 @@
 
 
             },
-            controllerAs: 'acSearchCtrl'
+            controllerAs: 'mvSearchCtrl'
         };
     }
 
-    AcUtilsController.$inject = [];
-    function AcUtilsController() {
+    MvUtilsController.$inject = [];
+    function MvUtilsController() {
     }
 
     /**
      * Expone variables de control de la clase
      * @type {string[]}
      */
-    AcUtilsGlobals.$inject = ['$rootScope'];
-    function AcUtilsGlobals($rootScope) {
+    MvUtilsGlobals.$inject = ['$rootScope'];
+    function MvUtilsGlobals($rootScope) {
         this.isWaiting = false;
         this.sucursal_auxiliar_id = -1;
         // Cantidad mínima de caracteres para que se ejecute getByParams
@@ -661,10 +645,10 @@
 
 
         this.broadcast = function () {
-            $rootScope.$broadcast("AcUtilsGlobalsValidations")
+            $rootScope.$broadcast("MvUtilsGlobalsValidations")
         };
         this.listen = function (callback) {
-            $rootScope.$on("AcUtilsGlobalsValidations", callback)
+            $rootScope.$on("MvUtilsGlobalsValidations", callback)
         };
 
         this.broadcastPanel = function () {
@@ -680,8 +664,8 @@
      * Expone validaciones y otras herramientas de uso común
      * @type {string[]}
      */
-    AcUtils.$inject = ['AcUtilsGlobals', '$document', '$timeout', '$q'];
-    function AcUtils(AcUtilsGlobals, $document, $timeout, $q) {
+    MvUtils.$inject = ['MvUtilsGlobals', '$document', '$timeout', '$q'];
+    function MvUtils(MvUtilsGlobals, $document, $timeout, $q) {
         var service = {};
 
         service.validateEmail = validateEmail;
@@ -916,13 +900,11 @@
                 });
             }
 
-            AcUtilsGlobals.listen(function () {
+            MvUtilsGlobals.listen(function () {
                 var control = angular.element(document.querySelectorAll('.error-input'));
                 var error = angular.element(document.querySelectorAll('.error-message'));
 
-
                 for (var i = 0; i < control.length; i++) {
-
                     control[i].classList.remove('error-input');
                     control[i].removeEventListener('focus');
                     mensaje.remove();
@@ -937,37 +919,37 @@
         function showMessage(tipo, texto, timeout) {
             var body = $document.find('body').eq(0);
 
-            //var class_type = (tipo == 'error') ? 'ac-error-message' : 'ac-success-message';
+            //var class_type = (tipo == 'error') ? 'mv-error-message' : 'mv-success-message';
             var class_type = '';
             var class_fa_type = '';
             var class_ico = '';
             if(tipo == 'success') {
-                class_type = 'ac-success-message';
+                class_type = 'mv-success-message';
                 class_fa_type = 'fa-check';
                 class_ico = 'ico-success';
             } else if(tipo == 'error') {
-                class_type = 'ac-error-message';
+                class_type = 'mv-error-message';
                 class_fa_type = 'fa-ban';
                 class_ico = 'ico-error';
             } else if(tipo == 'info') {
-                class_type = 'ac-info-message';
+                class_type = 'mv-info-message';
                 class_fa_type = 'fa-info-circle';
                 class_ico = 'ico-info';
             } else if(tipo == 'warning') {
-                class_type = 'ac-warning-message';
+                class_type = 'mv-warning-message';
                 class_fa_type = 'fa-warning';
                 class_ico = 'ico-warn';
             }
 
             body.append('<div ' +
                 'style="" ' +
-                'class="ac-mensaje-custom-show ' + class_type + '" ' +
-                'id="ac-mensaje-custom" onclick="this.remove();"><i class="fa ' + class_fa_type + ' ' + class_ico + ' fa-2x"></i>' + texto +
+                'class="mv-mensaje-custom-show ' + class_type + '" ' +
+                'id="mv-mensaje-custom" onclick="this.remove();"><i class="fa ' + class_fa_type + ' ' + class_ico + ' fa-2x"></i>' + texto +
                 '<i class="fa fa-times fa-2x exit-button ' + class_ico + '"' + ' onclick="this.remove();"></i></div>');
 
             timeout = (timeout == undefined) ? 3000 : timeout;
             $timeout(function () {
-                var el = angular.element(document.querySelector('#ac-mensaje-custom'));
+                var el = angular.element(document.querySelector('#mv-mensaje-custom'));
                 el.remove();
             }, timeout);
 
@@ -1074,15 +1056,15 @@
         }
     }
 
-    ErrorHandler.$inject = ['AcUtils'];
-    function ErrorHandler(AcUtils) {
+    ErrorHandler.$inject = ['MvUtils'];
+    function ErrorHandler(MvUtils) {
         return function (response) {
             if (response.status == 401) {
-                AcUtils.showMessage('error', 'No se encuentra autorizado para llevar a cabo esta acción.');
+                MvUtils.showMessage('error', 'No se encuentra autorizado para llevar a cabo esta acción.');
             } else if (response.status == 400 || response.status == 500) {
-                AcUtils.showMessage('error', 'Error: ' + response.status + '. ' + response.data);
+                MvUtils.showMessage('error', 'Error: ' + response.status + '. ' + response.data);
             } else {
-                AcUtils.showMessage('error', 'Error: ' + response.status + '. Por favor contacte al administrador.');
+                MvUtils.showMessage('error', 'Error: ' + response.status + '. Por favor contacte al administrador.');
             }
         }
     }
