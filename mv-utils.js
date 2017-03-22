@@ -747,7 +747,7 @@
 
                                 if (
                                     ( exacto && base.toUpperCase() !== valor.toUpperCase().replace('!', '')) ||
-                                    (!exacto && base.toUpperCase().indexOf(valor.toUpperCase().replace('!', '')) == -1)
+                                    (!exacto && !compareStringSearch(base.replace('!', ''), valor))
                                 ) {
                                     respuesta.push(data[y]);
                                     x = parametros.length;
@@ -761,7 +761,7 @@
                             } else {
                                 if (
                                     ( exacto && base.toUpperCase() == valor.toUpperCase()) ||
-                                    (!exacto && base.toUpperCase().indexOf(valor.toUpperCase()) > -1)
+                                    (!exacto && compareStringSearch(base, valor))
                                 ) {
                                     respuesta.push(data[y]);
                                     x = parametros.length;
@@ -778,6 +778,31 @@
             return deferred.promise;
         }
 
+        /**
+         * Función especializada en encontrar todas las coincidencias dentro de otra cadena, no importando el orden en
+         * la que se encuentra escrita la consulta.
+         * @param base
+         * @param valor
+         * @returns {boolean}
+         */
+        function compareStringSearch(base, valor) {
+
+            var valores = valor.split(" ");
+            var encontrados = 0;
+
+            for (var x = 0; x < valores.length; x++) {
+                var val = (valores.length > 1) ? valores[x] : valor;
+
+                if (base.toUpperCase().indexOf(val.toUpperCase()) > -1) {
+                    encontrados = encontrados + 1;
+                }
+
+            }
+
+
+            return encontrados == valores.length;
+
+        }
 
         function verifyBrowser() {
 
