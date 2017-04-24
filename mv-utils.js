@@ -241,7 +241,7 @@
                     if (texto == undefined || texto == 'undefined' || texto.trim().length == 0) {
                         // Remuevo el error si existe y salgo de la validación
                         removeError(getMainContainer(elem));
-                        return;
+                        return false;
                     }
 
 
@@ -257,7 +257,7 @@
 
                     // Sobreescribo el valor del texto que contiene la descr del error
                     MvUtilsGlobals.errores[parent][$element[0].id]['texto'] = texto;
-
+                    return true;
                 }
 
                 /**
@@ -357,7 +357,9 @@
                     }
 
                     var elem = $element;
-                    addError(getMainContainer(elem));
+                    if(!addError(getMainContainer(elem))){
+                        return;
+                    }
                     addMessages(elem);
                 }
 
